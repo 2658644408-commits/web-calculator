@@ -1,0 +1,5 @@
+com\example\userapi\controller\LoginControllerTest$SecurityTests.class
+com\example\userapi\controller\LoginControllerTest$ExceptionTests.class
+com\example\userapi\controller\LoginControllerTest$FunctionalTests.class
+com\example\userapi\controller\LoginControllerTest.class
+com\example\userapi\dto\LoginResponseTest.class

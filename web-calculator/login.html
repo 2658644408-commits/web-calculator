@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 340px;
+        }
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #333;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .login-box button:hover {
+            background: #45a049;
+        }
+        .login-box .error {
+            color: red;
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="login-box">
+    <h2>🔐 登录</h2>
+    <input type="text" id="username" placeholder="用户名 (admin)" />
+    <input type="password" id="password" placeholder="密码 (123456)" />
+    <button type="button" id="loginBtn">登录</button>
+    <div class="error" id="errorMsg"></div>
+</div>
+
+<script>
+    // 获取元素
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // 登录按钮点击事件
+    loginBtn.addEventListener('click', function(event) {
+        // 1. 最重要：阻止任何默认行为（防止页面刷新/跳转）
+        event.preventDefault();
+
+        // 2. 获取输入值
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        // 3. 简单前端校验
+        if (!username || !password) {
+            errorMsg.textContent = '❌ 用户名和密码不能为空';
+            return;
+        }
+
+        // 4. 清空旧错误信息
+        errorMsg.textContent = '⏳ 登录中...';
+
+        // 5. 调用后端接口
+        fetch('http://localhost:8080/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络响应异常: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('后端返回:', data); // 打印到控制台，方便调试
+
+                if (data.code === 200) {
+                    // 登录成功：存储 token，跳转
+                    localStorage.setItem('token', data.token || 'fake-token');
+                    window.location.href = 'index.html';
+                } else {
+                    // 登录失败：显示错误
+                    errorMsg.textContent = '❌ ' + (data.message || '登录失败');
+                }
+            })
+            .catch(error => {
+                console.error('请求失败:', error);
+                errorMsg.textContent = '❌ 后端服务未启动或网络异常，请检查 Java 应用是否运行在 8080 端口';
+            });
+    });
+</script>
+</body>
+</html>
